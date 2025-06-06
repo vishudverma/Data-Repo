@@ -197,7 +197,6 @@ order by 2,3
 
 create view PopulationVaccinated as 
 (
-
 select 
 	dea.continent, 
 	dea.location, 
@@ -211,5 +210,6 @@ join Portfolio..CovidVaccinations vac
 	and dea.date = vac.date
 where dea.continent is not null
 )
+
 select * 
 from PopulationVaccinated
