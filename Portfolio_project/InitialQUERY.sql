@@ -7,6 +7,7 @@ select *
 from Portfolio..CovidVaccinations
 order by 3,4;
 
+
 select 
 	location, 
 	date, 
@@ -138,26 +139,23 @@ where dea.continent is not null
 order by 2,3;
 
 
--- USE CTE(common table expressing)
+-- USE CTE(common table expression) the expression is followed by select statement to immediately get results no extra storage is made
 
-with PopvsVac (Continent,Location, Date, Population,New_Vaccinations, Rolling_people_vaccinated)
-
-as 
+WITH PopvsVac (Continent, Location, Date, Population, New_Vaccinations, Rolling_people_vaccinated) AS 
 (
-select 
-	dea.continent, 
-	dea.location, 
-	dea.date,
-	dea.population,
-	vac.new_vaccinations,
-	sum(vac.new_vaccinations) over (partition by dea.location order by dea.location, dea.date) as Rolling_people_vaccinated
-from Portfolio..CovidDeaths dea
-join Portfolio..CovidVaccinations vac
-	on dea.location = vac.location
-	and dea.date = vac.date
-where dea.continent is not null
+    SELECT 
+        dea.continent, 
+        dea.location, 
+        dea.date,
+        dea.population,
+        vac.new_vaccinations,
+        SUM(vac.new_vaccinations) OVER (PARTITION BY dea.location ORDER BY dea.location, dea.date) AS Rolling_people_vaccinated
+    FROM Portfolio..CovidDeaths dea
+    JOIN Portfolio..CovidVaccinations vac
+        ON dea.location = vac.location
+        AND dea.date = vac.date
+    WHERE dea.continent IS NOT NULL
 )
-
 select * , (Rolling_people_vaccinated/Population)*100 as vaccination_percentages
 from POPvsVac;
 
@@ -195,21 +193,19 @@ order by 2,3
 
 -- creating views to store data for later visualizations
 
-create view PopulationVaccinated as 
-(
-select 
-	dea.continent, 
-	dea.location, 
-	dea.date,
-	dea.population,
-	vac.new_vaccinations,
-	sum(vac.new_vaccinations) over (partition by dea.location order by dea.location, dea.date) as Rolling_people_vaccinated
-from Portfolio..CovidDeaths dea
-join Portfolio..CovidVaccinations vac
-	on dea.location = vac.location
-	and dea.date = vac.date
-where dea.continent is not null
-)
+CREATE VIEW PopulationVaccinated AS
+SELECT 
+    dea.continent, 
+    dea.location, 
+    dea.date,
+    dea.population,
+    vac.new_vaccinations,
+    SUM(vac.new_vaccinations) OVER (PARTITION BY dea.location ORDER BY dea.location, dea.date) AS Rolling_people_vaccinated
+FROM Portfolio..CovidDeaths dea
+JOIN Portfolio..CovidVaccinations vac
+    ON dea.location = vac.location
+    AND dea.date = vac.date
+WHERE dea.continent IS NOT NULL;
 
 select * 
 from PopulationVaccinated
